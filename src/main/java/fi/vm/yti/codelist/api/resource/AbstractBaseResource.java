@@ -16,6 +16,7 @@ import org.glassfish.jersey.jackson.internal.jackson.jaxrs.cfg.EndpointConfigBas
 import org.glassfish.jersey.jackson.internal.jackson.jaxrs.cfg.ObjectWriterModifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -25,6 +26,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 
+import fi.vm.yti.codelist.api.configuration.UriProperties;
 import fi.vm.yti.codelist.api.exception.YtiCodeListException;
 import fi.vm.yti.codelist.common.dto.ErrorModel;
 import fi.vm.yti.codelist.common.model.Status;
@@ -32,8 +34,6 @@ import static fi.vm.yti.codelist.api.util.EncodingUtils.urlDecodeString;
 import static fi.vm.yti.codelist.common.constants.ApiConstants.*;
 
 abstract class AbstractBaseResource {
-
-    public static final String SUOMI_URI_HOST = "http://uri.suomi.fi";
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractBaseResource.class);
     private static final String DOWNLOAD_FILENAME_CODEREGISTRIES = "coderegistries";
@@ -46,6 +46,9 @@ abstract class AbstractBaseResource {
     private static final String DOWNLOAD_FILENAME_MEMBERS = "members";
     private static final String HEADER_CONTENT_DISPOSITION = "content-disposition";
     private static final String DOWNLOAD_FILENAME_CROSS_REFERENCE_LIST = "crossreferencelist";
+
+    @Autowired
+    UriProperties uriProperties;
 
     SimpleFilterProvider createSimpleFilterProvider() {
         return createSimpleFilterProvider(FILTER_NAME_RESOURCE, null);
@@ -264,8 +267,8 @@ abstract class AbstractBaseResource {
         return Response.ok(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").header(HEADER_CONTENT_DISPOSITION, "attachment; filename = " + createDownloadFilename(FORMAT_EXCEL, filename)).build();
     }
 
-    void ensureSuomiFiUriHost(final String host) {
-        if (!host.startsWith(SUOMI_URI_HOST)) {
+    void ensureUriHost(final String host) {
+        if (!host.startsWith(uriProperties.getUriAddress())) {
             LOG.error("This URI is not resolvable as a codelist resource, wrong host.");
             throw new YtiCodeListException(new ErrorModel(HttpStatus.NOT_ACCEPTABLE.value(), "This URI is not resolvable as a codelist resource."));
         }

@@ -71,7 +71,7 @@ public class UriResolverResource extends AbstractBaseResource {
     @Produces({ MediaType.APPLICATION_JSON + ";charset=UTF-8", MediaType.TEXT_PLAIN })
     public Response resolveUri(@Parameter(description = "Resource URI.", required = true, in = ParameterIn.QUERY) @QueryParam("uri") final String uri) {
         final URI resolveUri = parseUriFromString(uri);
-        ensureSuomiFiUriHost(uri);
+        ensureUriHost(uri);
         final String uriPath = resolveUri.getPath();
         final ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
@@ -98,8 +98,8 @@ public class UriResolverResource extends AbstractBaseResource {
                                 @Parameter(description = "Filter string (csl) for expanding specific child resources.", in = ParameterIn.QUERY) @QueryParam("expand") final String expand,
                                 @Parameter(description = "Resource URI.", required = true, in = ParameterIn.QUERY) @Encoded @QueryParam("uri") final String uri) {
         final String uriDecoded = urlDecodeString(uri);
-        ensureSuomiFiUriHost(uriDecoded);
-        final String uriPath = uriDecoded.substring((SUOMI_URI_HOST).length());
+        ensureUriHost(uriDecoded);
+        final String uriPath = uriDecoded.substring((uriProperties.getUriAddress()).length());
         checkResourceValidity(uriPath);
         final String resourcePath = uriPath.substring(API_PATH_CODELIST.length() + 1);
         final List<String> resourcePathParams = parseResourcePathIdentifiers(resourcePath);
