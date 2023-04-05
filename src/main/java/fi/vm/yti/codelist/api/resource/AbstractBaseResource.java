@@ -268,7 +268,7 @@ abstract class AbstractBaseResource {
     }
 
     void ensureUriHost(final String host) {
-        if (!host.startsWith(uriProperties.getUriAddress())) {
+        if (!host.startsWith(uriProperties.getUriHostAddress())) {
             LOG.error("This URI is not resolvable as a codelist resource, wrong host.");
             throw new YtiCodeListException(new ErrorModel(HttpStatus.NOT_ACCEPTABLE.value(), "This URI is not resolvable as a codelist resource."));
         }
