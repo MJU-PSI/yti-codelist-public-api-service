@@ -3,6 +3,7 @@ package fi.vm.yti.codelist.api.resource;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.validation.constraints.Pattern;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -56,8 +57,8 @@ public class ExternalReferenceResource extends AbstractBaseResource {
                                           @Parameter(description = "CodeScheme id.", in = ParameterIn.QUERY) @QueryParam("codeSchemeId") final String codeSchemeId,
                                           @Parameter(description = "Return all links from the system.", in = ParameterIn.QUERY) @QueryParam("all") @DefaultValue("false") final boolean all,
                                           @Parameter(description = "Format for content.", in = ParameterIn.QUERY) @QueryParam("format") @DefaultValue(FORMAT_JSON) final String format,
-                                          @Parameter(description = "After date filtering parameter, results will be codes with modified date after this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("after") final String after,
-                                          @Parameter(description = "Before date filtering parameter, results will be codes with modified date before this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("before") final String before,
+                                          @Parameter(description = "After date filtering parameter, results will be codes with modified date after this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("after") @Pattern(regexp = "[0-9TZ\\-\\:\\+]+") final String after,
+                                          @Parameter(description = "Before date filtering parameter, results will be codes with modified date before this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("before") @Pattern(regexp = "[0-9TZ\\-\\:\\+]+") final String before,
                                           @Parameter(description = "Filter string (csl) for expanding specific child resources.", in = ParameterIn.QUERY) @QueryParam("expand") final String expand,
                                           @Parameter(description = "Pretty format JSON output.", in = ParameterIn.QUERY) @QueryParam("pretty") final String pretty) {
         CodeSchemeDTO codeScheme = null;
