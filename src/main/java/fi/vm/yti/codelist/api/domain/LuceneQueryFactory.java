@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
 
 @Singleton
 @Service
@@ -59,7 +60,7 @@ public class LuceneQueryFactory {
                 }
             }
         }
-        LOG.debug("ElasticSearch prefix / suffix query string disqualified: '" + searchTerm + "'");
+        LOG.debug("ElasticSearch prefix / suffix query string disqualified: '" + HtmlUtils.htmlEscape(searchTerm) + "'");
         throw new BadRequestException("Invalid query");
     }
 }

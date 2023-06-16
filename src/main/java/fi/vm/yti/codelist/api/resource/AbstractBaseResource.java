@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.util.HtmlUtils;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -314,7 +315,7 @@ abstract class AbstractBaseResource {
                 return dateFormat.parse(dateString);
             } catch (ParseException e) {
                 LOG.error("Parsing date from string failed: " + dateString);
-                throw new YtiCodeListException(new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Date input not valid: " + dateString));
+                throw new YtiCodeListException(new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Date input not valid: " + HtmlUtils.htmlEscape(dateString)));
             }
         }
         return null;

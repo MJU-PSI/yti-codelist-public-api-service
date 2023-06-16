@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.validation.constraints.Pattern;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.Encoded;
 import javax.ws.rs.GET;
@@ -20,6 +19,7 @@ import javax.ws.rs.core.Response;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.glassfish.jersey.jackson.internal.jackson.jaxrs.cfg.ObjectWriterInjector;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.HtmlUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -91,11 +91,13 @@ public class CodeRegistryResource extends AbstractBaseResource {
                                       @Parameter(description = "CodeRegistry CodeValue as string value.", in = ParameterIn.QUERY) @QueryParam("codeValue") final String codeRegistryCodeValue,
                                       @Parameter(description = "CodeRegistry name as string value.", in = ParameterIn.QUERY) @QueryParam("name") final String name,
                                       @Parameter(description = "Format for content.", in = ParameterIn.QUERY) @QueryParam("format") @DefaultValue(FORMAT_JSON) final String format,
-                                      @Parameter(description = "After date filtering parameter, results will be codes with modified date after this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("after") @Pattern(regexp = "[0-9TZ\\-\\:\\+]+") final String after,
-                                      @Parameter(description = "Before date filtering parameter, results will be codes with modified date before this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("before") @Pattern(regexp = "[0-9TZ\\-\\:\\+]+") final String before,
+                                      @Parameter(description = "After date filtering parameter, results will be codes with modified date after this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("after") String after,
+                                      @Parameter(description = "Before date filtering parameter, results will be codes with modified date before this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("before") String before,
                                       @Parameter(description = "Filter string (csl) for expanding specific child resources.", in = ParameterIn.QUERY) @QueryParam("expand") final String expand,
                                       @Parameter(description = "Organizations filtering parameter, results will be registries belonging to these organizations", in = ParameterIn.QUERY) @QueryParam("organizations") final String organizationsCsv,
                                       @Parameter(description = "Pretty format JSON output.", in = ParameterIn.QUERY) @QueryParam("pretty") final String pretty) {
+        after = HtmlUtils.htmlEscape(after);
+        before = HtmlUtils.htmlEscape(before);
         final List<String> organizations = organizationsCsv == null ? null : asList(organizationsCsv.split(","));
         final Meta meta = new Meta(200, pageSize, from, parseDateFromString(after), parseDateFromString(before));
         final Set<CodeRegistryDTO> codeRegistries = domain.getCodeRegistries(codeRegistryCodeValue, name, meta, organizations);
@@ -158,8 +160,8 @@ public class CodeRegistryResource extends AbstractBaseResource {
                                                @Parameter(description = "Status enumerations in CSL format.", in = ParameterIn.QUERY) @QueryParam("status") final String status,
                                                @Parameter(description = "Extension PropertyType localName as string value for searching.", in = ParameterIn.QUERY) @QueryParam("extensionPropertyType") final String extensionPropertyType,
                                                @Parameter(description = "Format for content.", in = ParameterIn.QUERY) @QueryParam("format") @DefaultValue(FORMAT_JSON) final String format,
-                                               @Parameter(description = "After date filtering parameter, results will be codes with modified date after this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("after") @Pattern(regexp = "[0-9TZ\\-\\:\\+]+") final String after,
-                                               @Parameter(description = "Before date filtering parameter, results will be codes with modified date before this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("before") @Pattern(regexp = "[0-9TZ\\-\\:\\+]+") final String before,
+                                               @Parameter(description = "After date filtering parameter, results will be codes with modified date after this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("after") final String after,
+                                               @Parameter(description = "Before date filtering parameter, results will be codes with modified date before this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("before") final String before,
                                                @Parameter(description = "Filter string (csl) for expanding specific child resources.", in = ParameterIn.QUERY) @QueryParam("expand") final String expand,
                                                @Parameter(description = "Sort mode for response values.", in = ParameterIn.QUERY) @QueryParam("sortMode") @DefaultValue("default") final String sortMode,
                                                @Parameter(description = "User organizations filtering parameter, for filtering unfinished code schemes") @QueryParam("userOrganizations") final String userOrganizationsCsv,
@@ -267,21 +269,25 @@ public class CodeRegistryResource extends AbstractBaseResource {
     @Tag(name = "Code")
     public Response getCodeRegistryCodeSchemeCodes(@Parameter(description = "Pagination parameter for page size.", in = ParameterIn.QUERY) @QueryParam("pageSize") final Integer pageSize,
                                                    @Parameter(description = "Pagination parameter for start index.", in = ParameterIn.QUERY) @QueryParam("from") @DefaultValue("0") final Integer from,
-                                                   @Parameter(description = "CodeRegistry CodeValue.", in = ParameterIn.PATH, required = true) @PathParam("codeRegistryCodeValue") @Pattern(regexp = "[0-9a-zA-Z\\_\\-]+") final String codeRegistryCodeValue,
-                                                   @Parameter(description = "CodeScheme CodeValue.", in = ParameterIn.PATH, required = true) @PathParam("codeSchemeCodeValue") @Pattern(regexp = "[0-9a-zA-Z\\_\\-]+") final String codeSchemeCodeValue,
+                                                   @Parameter(description = "CodeRegistry CodeValue.", in = ParameterIn.PATH, required = true) @PathParam("codeRegistryCodeValue") String codeRegistryCodeValue,
+                                                   @Parameter(description = "CodeScheme CodeValue.", in = ParameterIn.PATH, required = true) @PathParam("codeSchemeCodeValue") String codeSchemeCodeValue,
                                                    @Parameter(description = "Code code.", in = ParameterIn.QUERY) @QueryParam("codeValue") final String codeCodeValue,
                                                    @Parameter(description = "Code PrefLabel.", in = ParameterIn.QUERY) @QueryParam("prefLabel") final String prefLabel,
                                                    @Parameter(description = "Code Broader Code Id.", in = ParameterIn.QUERY) @QueryParam("broaderCodeId") final String broaderCodeId,
                                                    @Parameter(description = "Filter for hierarchy level.", in = ParameterIn.QUERY) @QueryParam("hierarchyLevel") final Integer hierarchyLevel,
                                                    @Parameter(description = "Status enumerations in CSL format.", in = ParameterIn.QUERY) @QueryParam("status") final String status,
                                                    @Parameter(description = "Format for content.", in = ParameterIn.QUERY) @QueryParam("format") @DefaultValue(FORMAT_JSON) final String format,
-                                                   @Parameter(description = "After date filtering parameter, results will be codes with modified date after this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("after") @Pattern(regexp = "[0-9TZ\\-\\:\\+]+") final String after,
-                                                   @Parameter(description = "Before date filtering parameter, results will be codes with modified date before this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("before") @Pattern(regexp = "[0-9TZ\\-\\:\\+]+") final String before,
+                                                   @Parameter(description = "After date filtering parameter, results will be codes with modified date after this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("after") String after,
+                                                   @Parameter(description = "Before date filtering parameter, results will be codes with modified date before this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("before") String before,
                                                    @Parameter(description = "Language code for sorting results.", in = ParameterIn.QUERY) @QueryParam("language") final String language,
                                                    @Parameter(description = "Filter string (csl) for expanding specific child resources.", in = ParameterIn.QUERY) @QueryParam("expand") final String expand,
                                                    @Parameter(description = "Returns code codeValues in JSON array format") @QueryParam("array") final String array,
                                                    @Parameter(description = "Pretty format JSON output.", in = ParameterIn.QUERY) @QueryParam("pretty") final String pretty,
                                                    @Parameter(description = "True if the JSON array should be downloaded as file", in = ParameterIn.QUERY) @QueryParam("downloadArray") final boolean downloadArray) {
+        codeRegistryCodeValue = HtmlUtils.htmlEscape(codeRegistryCodeValue);
+        codeSchemeCodeValue = HtmlUtils.htmlEscape(codeSchemeCodeValue);
+        after = HtmlUtils.htmlEscape(after);
+        before = HtmlUtils.htmlEscape(before);
         final Meta meta = new Meta(200, pageSize, from, parseDateFromString(after), parseDateFromString(before));
         final List<String> statusList = parseStatusCsl(status);
         final CodeSchemeDTO codeScheme = domain.getCodeScheme(codeRegistryCodeValue, codeSchemeCodeValue);
@@ -332,8 +338,8 @@ public class CodeRegistryResource extends AbstractBaseResource {
                                                         @Parameter(description = "CodeScheme CodeValue.", in = ParameterIn.PATH, required = true) @PathParam("codeSchemeCodeValue") final String codeSchemeCodeValue,
                                                         @Parameter(description = "Extension PrefLabel.", in = ParameterIn.QUERY) @QueryParam("prefLabel") final String prefLabel,
                                                         @Parameter(description = "Format for content.", in = ParameterIn.QUERY) @QueryParam("format") @DefaultValue(FORMAT_JSON) final String format,
-                                                        @Parameter(description = "After date filtering parameter, results will be codes with modified date after this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("after") @Pattern(regexp = "[0-9TZ\\-\\:\\+]+") final String after,
-                                                        @Parameter(description = "Before date filtering parameter, results will be codes with modified date before this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("before") @Pattern(regexp = "[0-9TZ\\-\\:\\+]+") final String before,
+                                                        @Parameter(description = "After date filtering parameter, results will be codes with modified date after this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("after") final String after,
+                                                        @Parameter(description = "Before date filtering parameter, results will be codes with modified date before this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("before") final String before,
                                                         @Parameter(description = "Filter string (csl) for expanding specific child resources.", in = ParameterIn.QUERY) @QueryParam("expand") final String expand,
                                                         @Parameter(description = "Pretty format JSON output.", in = ParameterIn.QUERY) @QueryParam("pretty") final String pretty) {
         final Meta meta = new Meta(200, pageSize, from, parseDateFromString(after), parseDateFromString(before));
@@ -408,16 +414,21 @@ public class CodeRegistryResource extends AbstractBaseResource {
     @Tag(name = "Member")
     public Response getCodeRegistryCodeSchemeExtensionMembers(@Parameter(description = "Pagination parameter for page size.", in = ParameterIn.QUERY) @QueryParam("pageSize") final Integer pageSize,
                                                               @Parameter(description = "Pagination parameter for start index.", in = ParameterIn.QUERY) @QueryParam("from") @DefaultValue("0") final Integer from,
-                                                              @Parameter(description = "CodeRegistry CodeValue.", in = ParameterIn.PATH, required = true) @PathParam("codeRegistryCodeValue") @Pattern(regexp = "[0-9a-zA-Z\\_\\-]+") final String codeRegistryCodeValue,
-                                                              @Parameter(description = "CodeScheme CodeValue.", in = ParameterIn.PATH, required = true) @PathParam("codeSchemeCodeValue") @Pattern(regexp = "[0-9a-zA-Z\\_\\-]+") final String codeSchemeCodeValue,
-                                                              @Parameter(description = "Extension CodeValue.", in = ParameterIn.PATH, required = true) @PathParam("extensionCodeValue") @Pattern(regexp = "[0-9a-zA-Z\\_\\-]+") final String extensionCodeValue,
+                                                              @Parameter(description = "CodeRegistry CodeValue.", in = ParameterIn.PATH, required = true) @PathParam("codeRegistryCodeValue") String codeRegistryCodeValue,
+                                                              @Parameter(description = "CodeScheme CodeValue.", in = ParameterIn.PATH, required = true) @PathParam("codeSchemeCodeValue") String codeSchemeCodeValue,
+                                                              @Parameter(description = "Extension CodeValue.", in = ParameterIn.PATH, required = true) @PathParam("extensionCodeValue") String extensionCodeValue,
                                                               @Parameter(description = "Extension PrefLabel.", in = ParameterIn.QUERY) @QueryParam("prefLabel") final String prefLabel,
                                                               @Parameter(description = "Format for content.", in = ParameterIn.QUERY) @QueryParam("format") @DefaultValue(FORMAT_JSON) final String format,
-                                                              @Parameter(description = "After date filtering parameter, results will be codes with modified date after this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("after") @Pattern(regexp = "[0-9TZ\\-\\:\\+]+")  final String after,
-                                                              @Parameter(description = "Before date filtering parameter, results will be codes with modified date before this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("before") @Pattern(regexp = "[0-9TZ\\-\\:\\+]+") final String before,
+                                                              @Parameter(description = "After date filtering parameter, results will be codes with modified date after this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("after") String after,
+                                                              @Parameter(description = "Before date filtering parameter, results will be codes with modified date before this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("before") String before,
                                                               @Parameter(description = "Is this a Cross-Refence List or not.", in = ParameterIn.QUERY) @QueryParam("crossreferencelist") @DefaultValue("false") final boolean exportAsSimplifiedCrossReferenceList,
                                                               @Parameter(description = "Filter string (csl) for expanding specific child resources.", in = ParameterIn.QUERY) @QueryParam("expand") final String expand,
                                                               @Parameter(description = "Pretty format JSON output.", in = ParameterIn.QUERY) @QueryParam("pretty") final String pretty) {
+        codeRegistryCodeValue = HtmlUtils.htmlEscape(codeRegistryCodeValue);
+        codeSchemeCodeValue = HtmlUtils.htmlEscape(codeSchemeCodeValue);
+        extensionCodeValue = HtmlUtils.htmlEscape(extensionCodeValue);
+        after = HtmlUtils.htmlEscape(after);
+        before = HtmlUtils.htmlEscape(before);
         final Meta meta = new Meta(200, pageSize, from, parseDateFromString(after), parseDateFromString(before));
         final ExtensionDTO extension = domain.getExtension(codeRegistryCodeValue, codeSchemeCodeValue, extensionCodeValue);
         if (extension != null) {
@@ -483,13 +494,17 @@ public class CodeRegistryResource extends AbstractBaseResource {
     @Tag(name = "ExternalReference")
     public Response getCodeRegistryCodeSchemeExternalReferences(@Parameter(description = "Pagination parameter for page size.", in = ParameterIn.QUERY) @QueryParam("pageSize") final Integer pageSize,
                                                                 @Parameter(description = "Pagination parameter for start index.", in = ParameterIn.QUERY) @QueryParam("from") @DefaultValue("0") final Integer from,
-                                                                @Parameter(description = "CodeRegistry CodeValue.", in = ParameterIn.PATH, required = true) @PathParam("codeRegistryCodeValue") @Pattern(regexp = "[0-9a-zA-Z\\_\\-]+") final String codeRegistryCodeValue,
-                                                                @Parameter(description = "CodeScheme CodeValue.", in = ParameterIn.PATH, required = true) @PathParam("codeSchemeCodeValue") @Pattern(regexp = "[0-9a-zA-Z\\_\\-]+") final String codeSchemeCodeValue,
+                                                                @Parameter(description = "CodeRegistry CodeValue.", in = ParameterIn.PATH, required = true) @PathParam("codeRegistryCodeValue") String codeRegistryCodeValue,
+                                                                @Parameter(description = "CodeScheme CodeValue.", in = ParameterIn.PATH, required = true) @PathParam("codeSchemeCodeValue") String codeSchemeCodeValue,
                                                                 @Parameter(description = "Extension PrefLabel.", in = ParameterIn.QUERY) @QueryParam("prefLabel") final String prefLabel,
-                                                                @Parameter(description = "After date filtering parameter, results will be codes with modified date after this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("after") @Pattern(regexp = "[0-9TZ\\-\\:\\+]+") final String after,
-                                                                @Parameter(description = "Before date filtering parameter, results will be codes with modified date before this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("before") @Pattern(regexp = "[0-9TZ\\-\\:\\+]+") final String before,
+                                                                @Parameter(description = "After date filtering parameter, results will be codes with modified date after this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("after") String after,
+                                                                @Parameter(description = "Before date filtering parameter, results will be codes with modified date before this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("before") String before,
                                                                 @Parameter(description = "Filter string (csl) for expanding specific child resources.", in = ParameterIn.QUERY) @QueryParam("expand") final String expand,
                                                                 @Parameter(description = "Pretty format JSON output.", in = ParameterIn.QUERY) @QueryParam("pretty") final String pretty) {
+        codeRegistryCodeValue = HtmlUtils.htmlEscape(codeRegistryCodeValue);
+        codeSchemeCodeValue = HtmlUtils.htmlEscape(codeSchemeCodeValue);
+        after = HtmlUtils.htmlEscape(after);
+        before = HtmlUtils.htmlEscape(before);
         final Meta meta = new Meta(200, pageSize, from, parseDateFromString(after), parseDateFromString(before));
         final CodeSchemeDTO codeScheme = domain.getCodeScheme(codeRegistryCodeValue, codeSchemeCodeValue);
         if (codeScheme != null) {
@@ -542,8 +557,8 @@ public class CodeRegistryResource extends AbstractBaseResource {
                                                          @Parameter(description = "Extension PrefLabel.", in = ParameterIn.QUERY) @QueryParam("prefLabel") final String prefLabel,
                                                          @Parameter(description = "Code code.", in = ParameterIn.PATH, required = true) @Encoded @PathParam("codeCodeValue") final String codeCodeValue,
                                                          @Parameter(description = "Format for content.", in = ParameterIn.QUERY) @QueryParam("format") @DefaultValue(FORMAT_JSON) final String format,
-                                                         @Parameter(description = "After date filtering parameter, results will be codes with modified date after this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("after") @Pattern(regexp = "[0-9TZ\\-\\:\\+]+") final String after,
-                                                         @Parameter(description = "Before date filtering parameter, results will be codes with modified date before this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("before") @Pattern(regexp = "[0-9TZ\\-\\:\\+]+") final String before,
+                                                         @Parameter(description = "After date filtering parameter, results will be codes with modified date after this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("after") final String after,
+                                                         @Parameter(description = "Before date filtering parameter, results will be codes with modified date before this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("before") final String before,
                                                          @Parameter(description = "Filter string (csl) for expanding specific child resources.", in = ParameterIn.QUERY) @QueryParam("expand") final String expand,
                                                          @Parameter(description = "Pretty format JSON output.", in = ParameterIn.QUERY) @QueryParam("pretty") final String pretty) {
         final Meta meta = new Meta(200, pageSize, from, parseDateFromString(after), parseDateFromString(before));
