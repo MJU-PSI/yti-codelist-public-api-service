@@ -96,8 +96,8 @@ public class CodeRegistryResource extends AbstractBaseResource {
                                       @Parameter(description = "Filter string (csl) for expanding specific child resources.", in = ParameterIn.QUERY) @QueryParam("expand") final String expand,
                                       @Parameter(description = "Organizations filtering parameter, results will be registries belonging to these organizations", in = ParameterIn.QUERY) @QueryParam("organizations") final String organizationsCsv,
                                       @Parameter(description = "Pretty format JSON output.", in = ParameterIn.QUERY) @QueryParam("pretty") final String pretty) {
-        after = HtmlUtils.htmlEscape(after);
-        before = HtmlUtils.htmlEscape(before);
+        after = after != null ? HtmlUtils.htmlEscape(after) : null;
+        before = before != null ? HtmlUtils.htmlEscape(before) : null;
         final List<String> organizations = organizationsCsv == null ? null : asList(organizationsCsv.split(","));
         final Meta meta = new Meta(200, pageSize, from, parseDateFromString(after), parseDateFromString(before));
         final Set<CodeRegistryDTO> codeRegistries = domain.getCodeRegistries(codeRegistryCodeValue, name, meta, organizations);
@@ -286,8 +286,8 @@ public class CodeRegistryResource extends AbstractBaseResource {
                                                    @Parameter(description = "True if the JSON array should be downloaded as file", in = ParameterIn.QUERY) @QueryParam("downloadArray") final boolean downloadArray) {
         codeRegistryCodeValue = HtmlUtils.htmlEscape(codeRegistryCodeValue);
         codeSchemeCodeValue = HtmlUtils.htmlEscape(codeSchemeCodeValue);
-        after = HtmlUtils.htmlEscape(after);
-        before = HtmlUtils.htmlEscape(before);
+        after = after != null ? HtmlUtils.htmlEscape(after) : null;
+        before = before != null ? HtmlUtils.htmlEscape(before) : null;
         final Meta meta = new Meta(200, pageSize, from, parseDateFromString(after), parseDateFromString(before));
         final List<String> statusList = parseStatusCsl(status);
         final CodeSchemeDTO codeScheme = domain.getCodeScheme(codeRegistryCodeValue, codeSchemeCodeValue);
@@ -427,8 +427,8 @@ public class CodeRegistryResource extends AbstractBaseResource {
         codeRegistryCodeValue = HtmlUtils.htmlEscape(codeRegistryCodeValue);
         codeSchemeCodeValue = HtmlUtils.htmlEscape(codeSchemeCodeValue);
         extensionCodeValue = HtmlUtils.htmlEscape(extensionCodeValue);
-        after = HtmlUtils.htmlEscape(after);
-        before = HtmlUtils.htmlEscape(before);
+        after = after != null ? HtmlUtils.htmlEscape(after) : null;
+        before = before != null ? HtmlUtils.htmlEscape(before) : null;
         final Meta meta = new Meta(200, pageSize, from, parseDateFromString(after), parseDateFromString(before));
         final ExtensionDTO extension = domain.getExtension(codeRegistryCodeValue, codeSchemeCodeValue, extensionCodeValue);
         if (extension != null) {
@@ -503,8 +503,8 @@ public class CodeRegistryResource extends AbstractBaseResource {
                                                                 @Parameter(description = "Pretty format JSON output.", in = ParameterIn.QUERY) @QueryParam("pretty") final String pretty) {
         codeRegistryCodeValue = HtmlUtils.htmlEscape(codeRegistryCodeValue);
         codeSchemeCodeValue = HtmlUtils.htmlEscape(codeSchemeCodeValue);
-        after = HtmlUtils.htmlEscape(after);
-        before = HtmlUtils.htmlEscape(before);
+        after = after != null ? HtmlUtils.htmlEscape(after) : null;
+        before = before != null ? HtmlUtils.htmlEscape(before) : null;
         final Meta meta = new Meta(200, pageSize, from, parseDateFromString(after), parseDateFromString(before));
         final CodeSchemeDTO codeScheme = domain.getCodeScheme(codeRegistryCodeValue, codeSchemeCodeValue);
         if (codeScheme != null) {
