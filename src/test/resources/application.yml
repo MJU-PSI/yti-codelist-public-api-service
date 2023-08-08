@@ -16,15 +16,13 @@ service:
   name: yti-codelist-public-api-service
   database-name: yti_codelist
 
-yti_codelist_public_api_service_elastic_host: ${environment.elastic.host}
-yti_codelist_public_api_service_elastic_port: ${testelasticsearch.http.port}
-
 groupmanagement:
   url: https://rhp.dev.yti.cloud.dvv.fi
   publicUrl: https://rhp.dev.yti.cloud.dvv.fi
 
 environment:
-  elastic:
+  elasticsearch:
+    scheme: http
     host: 127.0.0.1
     port: 9200
 
