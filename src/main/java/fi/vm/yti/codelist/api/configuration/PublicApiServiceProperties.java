@@ -12,38 +12,17 @@ import org.springframework.validation.annotation.Validated;
 public class PublicApiServiceProperties {
 
     @NotNull
-    private String host;
-
-    private String port;
-
-    @NotNull
-    private String scheme;
+    private String publicUrl;
 
     @NotNull
     private String contextPath;
 
-    public String getHost() {
-        return host;
+    public String getPublicUrl() {
+        return publicUrl;
     }
 
-    public void setHost(final String host) {
-        this.host = host;
-    }
-
-    public String getPort() {
-        return port;
-    }
-
-    public void setPort(final String port) {
-        this.port = port;
-    }
-
-    public String getScheme() {
-        return scheme;
-    }
-
-    public void setScheme(final String scheme) {
-        this.scheme = scheme;
+    public void setPublicUrl(final String publicUrl) {
+        this.publicUrl = publicUrl;
     }
 
     public String getContextPath() {

@@ -4,7 +4,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import fi.vm.yti.codelist.api.configuration.FrontendProperties;
 import fi.vm.yti.codelist.api.configuration.PublicApiServiceProperties;
 import static fi.vm.yti.codelist.common.constants.ApiConstants.*;
 
@@ -12,13 +11,10 @@ import static fi.vm.yti.codelist.common.constants.ApiConstants.*;
 public class ApiUtils {
 
     private final PublicApiServiceProperties publicApiServiceProperties;
-    private final FrontendProperties frontendProperties;
 
     @Inject
-    public ApiUtils(final PublicApiServiceProperties publicApiServiceProperties,
-                    final FrontendProperties frontendProperties) {
+    public ApiUtils(final PublicApiServiceProperties publicApiServiceProperties) {
         this.publicApiServiceProperties = publicApiServiceProperties;
-        this.frontendProperties = frontendProperties;
     }
 
     public String createNextPageUrl(final String apiVersion,
@@ -26,15 +22,8 @@ public class ApiUtils {
                                     final String after,
                                     final Integer pageSize,
                                     final Integer from) {
-        final String port = publicApiServiceProperties.getPort();
         final StringBuilder builder = new StringBuilder();
-        builder.append(publicApiServiceProperties.getScheme());
-        builder.append("://");
-        builder.append(publicApiServiceProperties.getHost());
-        if (port != null && !port.isEmpty()) {
-            builder.append(":");
-            builder.append(port);
-        }
+        builder.append(publicApiServiceProperties.getPublicUrl());
         builder.append(publicApiServiceProperties.getContextPath());
         builder.append(API_BASE_PATH);
         builder.append("/");
@@ -128,33 +117,15 @@ public class ApiUtils {
     }
 
     private String createBaseUrl() {
-        final String port = publicApiServiceProperties.getPort();
-
         final StringBuilder builder = new StringBuilder();
-
-        builder.append(publicApiServiceProperties.getScheme());
-        builder.append("://");
-        builder.append(publicApiServiceProperties.getHost());
-        if (port != null && !port.isEmpty()) {
-            builder.append(":");
-            builder.append(port);
-        }
+        builder.append(publicApiServiceProperties.getPublicUrl());
 
         return builder.toString();
     }
 
     private String createFrontendBaseUrl() {
-        final String port = frontendProperties.getPort();
-
         final StringBuilder builder = new StringBuilder();
-
-        builder.append(frontendProperties.getScheme());
-        builder.append("://");
-        builder.append(frontendProperties.getHost());
-        if (port != null && !port.isEmpty()) {
-            builder.append(":");
-            builder.append(port);
-        }
+        builder.append(publicApiServiceProperties.getPublicUrl());
 
         return builder.toString();
     }

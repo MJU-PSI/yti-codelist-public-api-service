@@ -30,15 +30,9 @@ server:
   port: 9601
 
 application:
-  scheme: http
-  host: localhost
-  port: 9601
+  publicUrl: http://localhost:9001
   contextPath: /codelist-api
   access-log: true
-
-frontend:
-  scheme: http
-  host: localhost
 
 session:
   timeout-mins: 10
