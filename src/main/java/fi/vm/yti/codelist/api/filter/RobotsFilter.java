@@ -23,7 +23,7 @@ public class RobotsFilter implements ContainerResponseFilter {
     @Override
     public void filter(final ContainerRequestContext requestContext,
                        final ContainerResponseContext responseContext) {
-        if (publicApiServiceProperties.getHost().contains(DEV_DOMAIN)) {
+        if (publicApiServiceProperties.getPublicUrl().contains(DEV_DOMAIN)) {
             responseContext.getHeaders().add("X-Robots-Tag", "none");
         }
         responseContext.getHeaders().add("Strict-Transport-Security", "max-age=31536000");

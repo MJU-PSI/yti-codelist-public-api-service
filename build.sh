@@ -1,4 +1,2 @@
 #!/bin/bash
-#
-#
-mvn clean package docker:build
+docker build -t yti-codelist-public-api-service:latest .
