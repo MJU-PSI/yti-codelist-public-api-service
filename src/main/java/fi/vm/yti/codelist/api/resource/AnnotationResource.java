@@ -1,0 +1,94 @@
+package fi.vm.yti.codelist.api.resource;
+
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.validation.constraints.Pattern;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.glassfish.jersey.jackson.internal.jackson.jaxrs.cfg.ObjectWriterInjector;
+import org.springframework.stereotype.Component;
+
+import fi.vm.yti.codelist.api.api.ResponseWrapper;
+import fi.vm.yti.codelist.api.domain.Domain;
+import fi.vm.yti.codelist.api.exception.NotFoundException;
+import fi.vm.yti.codelist.common.dto.AnnotationDTO;
+import fi.vm.yti.codelist.common.dto.Meta;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import static fi.vm.yti.codelist.common.constants.ApiConstants.*;
+
+@Component
+@Path("/v1/annotations")
+@Produces({ MediaType.APPLICATION_JSON + ";charset=UTF-8", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "text/csv" })
+@Tag(name = "Annotation")
+public class AnnotationResource extends AbstractBaseResource {
+
+    private final Domain domain;
+
+    @Inject
+    public AnnotationResource(final Domain domain) {
+        this.domain = domain;
+    }
+
+    @GET
+    @Operation(description = "Return list of available Annotations.")
+    @ApiResponse(responseCode = "200", description = "Returns all Annotations.")
+    @Produces({ MediaType.APPLICATION_JSON + ";charset=UTF-8", MediaType.TEXT_PLAIN })
+    public Response getAnnotations(@Parameter(description = "Annotation codeValue as string value.", in = ParameterIn.QUERY) @QueryParam("codeValue") final String codeValue,
+                                   @Parameter(description = "Annotation PrefLabel as string value.", in = ParameterIn.QUERY) @QueryParam("prefLabel") final String prefLabel,
+                                   @Parameter(description = "Search term for matching codeValue and prefLabel.", in = ParameterIn.QUERY) @QueryParam("searchTerm") final String searchTerm,
+                                   @Parameter(description = "Pagination parameter for page size.", in = ParameterIn.QUERY) @QueryParam("pageSize") final Integer pageSize,
+                                   @Parameter(description = "Pagination parameter for start index.", in = ParameterIn.QUERY) @QueryParam("from") @DefaultValue("0") final Integer from,
+                                   @Parameter(description = "Format for content.", in = ParameterIn.QUERY) @QueryParam("format") @DefaultValue(FORMAT_JSON) final String format,
+                                   @Parameter(description = "After date filtering parameter, results will be codes with modified date after this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("after") @Pattern(regexp = "[0-9TZ\\-\\:\\+]+") final String after,
+                                   @Parameter(description = "Before date filtering parameter, results will be codes with modified date before this ISO 8601 formatted date string.", in = ParameterIn.QUERY) @QueryParam("before") @Pattern(regexp = "[0-9TZ\\-\\:\\+]+") final String before,
+                                   @Parameter(description = "Filter string (csl) for expanding specific child resources.", in = ParameterIn.QUERY) @QueryParam("expand") final String expand,
+                                   @Parameter(description = "Pretty format JSON output.", in = ParameterIn.QUERY) @QueryParam("pretty") final String pretty) {
+
+        final Meta meta = new Meta(200, pageSize, from, parseDateFromString(after), parseDateFromString(before));
+        final Set<AnnotationDTO> annotations = domain.getAnnotations(searchTerm, meta);
+        if (FORMAT_CSV.startsWith(format.toLowerCase())) {
+            // final String csv = annotationExporter.createCsv(null, annotations);
+            // return streamCsvMembersOutput(csv);
+            throw new NotFoundException(); // TODO
+        } else if (FORMAT_EXCEL.equalsIgnoreCase(format) || FORMAT_EXCEL_XLS.equalsIgnoreCase(format) || FORMAT_EXCEL_XLSX.equalsIgnoreCase(format)) {
+            // final Workbook workbook = annotationExporter.createExcel(null, annotations, format);
+            // return streamExcelMembersOutput(workbook);
+            throw new NotFoundException(); // TODO
+        } else {
+            ObjectWriterInjector.set(new FilterModifier(createSimpleFilterProvider(FILTER_NAME_ANNOTATION, expand), pretty));
+            final ResponseWrapper<AnnotationDTO> wrapper = new ResponseWrapper<>();
+            wrapper.setResults(annotations);
+            wrapper.setMeta(meta);
+            return Response.ok(wrapper).build();
+        }
+    }
+
+    @GET
+    @Path("{codeValue}")
+    @Operation(description = "Return one specific Annotation.")
+    @ApiResponse(responseCode = "200", description = "Returns one specific Annotation in JSON format.")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+    public Response getAnnotation(@Parameter(description = "Annotation CodeValue.", in = ParameterIn.PATH, required = true) @PathParam("codeValue") final String codeValue,
+                                  @Parameter(description = "Filter string (csl) for expanding specific child resources.", in = ParameterIn.QUERY) @QueryParam("expand") final String expand,
+                                  @Parameter(description = "Pretty format JSON output.", in = ParameterIn.QUERY) @QueryParam("pretty") final String pretty) {
+        ObjectWriterInjector.set(new FilterModifier(createSimpleFilterProvider(FILTER_NAME_ANNOTATION, expand), pretty));
+        final AnnotationDTO annotation = domain.getAnnotation(codeValue);
+        if (annotation != null) {
+            return Response.ok(annotation).build();
+        } else {
+            throw new NotFoundException();
+        }
+    }
+}

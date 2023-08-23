@@ -15,6 +15,7 @@ import fi.vm.yti.codelist.api.filter.CacheFilter;
 import fi.vm.yti.codelist.api.filter.CharsetResponseFilter;
 import fi.vm.yti.codelist.api.filter.RequestLoggingFilter;
 import fi.vm.yti.codelist.api.filter.RobotsFilter;
+import fi.vm.yti.codelist.api.resource.AnnotationResource;
 import fi.vm.yti.codelist.api.resource.CodeRegistryResource;
 import fi.vm.yti.codelist.api.resource.CodeSchemeResource;
 import fi.vm.yti.codelist.api.resource.ExtensionResource;
@@ -100,6 +101,7 @@ public class JerseyConfig extends ResourceConfig {
         register(ExtensionResource.class);
         register(MemberResource.class);
         register(ValueTypeResource.class);
+        register(AnnotationResource.class);
 
         // API: Integration API
         register(IntegrationResource.class);

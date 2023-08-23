@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import fi.vm.yti.codelist.api.dto.ResourceDTO;
+import fi.vm.yti.codelist.common.dto.AnnotationDTO;
 import fi.vm.yti.codelist.common.dto.CodeDTO;
 import fi.vm.yti.codelist.common.dto.CodeRegistryDTO;
 import fi.vm.yti.codelist.common.dto.CodeSchemeDTO;
@@ -15,6 +16,11 @@ import fi.vm.yti.codelist.common.dto.PropertyTypeDTO;
 import fi.vm.yti.codelist.common.dto.ValueTypeDTO;
 
 public interface Domain {
+
+    Set<AnnotationDTO> getAnnotations(final String searchTerm,
+                                     final Meta meta);
+
+    AnnotationDTO getAnnotation(final String codeValue);
 
     CodeRegistryDTO getCodeRegistry(final String codeRegistryCodeValue);
 

@@ -39,6 +39,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import fi.vm.yti.codelist.api.dto.ResourceDTO;
 import fi.vm.yti.codelist.api.exception.JsonParsingException;
 import fi.vm.yti.codelist.api.exception.YtiCodeListException;
+import fi.vm.yti.codelist.common.dto.AnnotationDTO;
 import fi.vm.yti.codelist.common.dto.CodeDTO;
 import fi.vm.yti.codelist.common.dto.CodeRegistryDTO;
 import fi.vm.yti.codelist.common.dto.CodeSchemeDTO;
@@ -413,6 +414,84 @@ public class DomainImpl implements Domain {
         allStatuses.add(Status.RETIRED.toString());
         allStatuses.add(Status.SUPERSEDED.toString());
         return allStatuses;
+    }
+
+    public AnnotationDTO getAnnotation(final String codeValue) {
+        if (checkIfIndexExists(ELASTIC_INDEX_ANNOTATIONE)) {
+            final SearchSourceBuilder searchBuilder = new SearchSourceBuilder();
+            searchBuilder.sort("codeValue.raw", SortOrder.ASC);
+            final BoolQueryBuilder builder = boolQuery().should(matchQuery("id", codeValue.toLowerCase())).should(matchQuery("codeValue", codeValue.toLowerCase()).analyzer(TEXT_ANALYZER)).minimumShouldMatch(1);
+            searchBuilder.query(builder);
+            return doAnnotationRequest(searchBuilder);
+        }
+        return null;
+    }
+
+    private AnnotationDTO doAnnotationRequest(final SearchSourceBuilder searchBuilder) {
+        final SearchRequest searchRequest = createSearchRequest(ELASTIC_INDEX_ANNOTATIONE);
+        searchRequest.source(searchBuilder);
+        final ObjectMapper mapper = createObjectMapperWithRegisteredModules();
+        try {
+            final SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
+            LOG.debug(String.format("getAnnotation found: %d hits.", response.getHits().getTotalHits()));
+            if (response.getHits().getTotalHits() > 0) {
+                final SearchHit hit = response.getHits().getAt(0);
+                try {
+                    if (hit != null) {
+                        return mapper.readValue(hit.getSourceAsString(), AnnotationDTO.class);
+                    }
+                } catch (final IOException e) {
+                    LOG.error("getAnnotation reading value from JSON string failed: " + hit.getSourceAsString(), e);
+                    throw new JsonParsingException(ERR_MSG_USER_406);
+                }
+            }
+        } catch (final IOException e) {
+            LOG.error("SearchRequest failed!", e);
+            throw new YtiCodeListException(new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), ELASTIC_QUERY_ERROR));
+        }
+        return null;
+    }
+
+    public Set<AnnotationDTO> getAnnotations(final String searchTerm,
+                                 final Meta meta) {
+        validatePageSize(meta);
+        boolean fetchMore = false;
+        final Set<AnnotationDTO> annotations = new LinkedHashSet<>();
+        if (checkIfIndexExists(ELASTIC_INDEX_ANNOTATIONE)) {
+            final ObjectMapper mapper = createObjectMapperWithRegisteredModules();
+            final SearchRequest searchRequest = createSearchRequest(ELASTIC_INDEX_ANNOTATIONE);
+            final SearchSourceBuilder searchBuilder = createSearchSourceBuilderWithPagination(meta);
+            final BoolQueryBuilder builder = constructAndOrQueryForPrefLabelAndCodeValue(searchTerm);
+            embedAfterBeforeToBoolQuery(builder, meta);
+            searchBuilder.query(builder);
+            searchRequest.source(searchBuilder);
+            try {
+                final SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
+                setResultCounts(meta, response);
+                if (meta.getResultCount() == MAX_ES_PAGESIZE && meta.getPageSize() == null) {
+                    fetchMore = true;
+                }
+                response.getHits().forEach(hit -> {
+                    try {
+                        annotations.add(mapper.readValue(hit.getSourceAsString(), AnnotationDTO.class));
+                    } catch (final IOException e) {
+                        LOG.error("getAnnotations reading value from JSON string failed: " + hit.getSourceAsString(), e);
+                        throw new JsonParsingException(ERR_MSG_USER_406);
+                    }
+                });
+            } catch (final IOException e) {
+                LOG.error("SearchRequest failed!", e);
+                throw new YtiCodeListException(new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), ELASTIC_QUERY_ERROR));
+            }
+            if (!fetchMore) {
+                return annotations;
+            } else {
+                meta.setFrom(MAX_ES_PAGESIZE);
+                meta.setPageSize(MAX_ES_PAGESIZE);
+                annotations.addAll(getAnnotations(searchTerm, meta));
+            }
+        }
+        return annotations;
     }
 
     public CodeDTO getCode(final String codeId) {
@@ -1301,6 +1380,8 @@ public class DomainImpl implements Domain {
                 return createSearchRequest(ELASTIC_INDEX_CODEREGISTRY, ELASTIC_TYPE_CODEREGISTRY);
             case ELASTIC_INDEX_CODESCHEME:
                 return createSearchRequest(ELASTIC_INDEX_CODESCHEME, ELASTIC_TYPE_CODESCHEME);
+            case ELASTIC_INDEX_ANNOTATIONE:
+                return createSearchRequest(ELASTIC_INDEX_ANNOTATIONE, ELASTIC_TYPE_ANNOTATIONE);
             case ELASTIC_INDEX_CODE:
                 return createSearchRequest(ELASTIC_INDEX_CODE, ELASTIC_TYPE_CODE);
             case ELASTIC_INDEX_EXTENSION:
