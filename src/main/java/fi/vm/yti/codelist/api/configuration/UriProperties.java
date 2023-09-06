@@ -17,6 +17,9 @@ public class UriProperties {
     @NotNull
     private String host;
 
+    @NotNull
+    private String contextPath;
+
     public String getHost() {
         return host;
     }
@@ -33,7 +36,15 @@ public class UriProperties {
         this.scheme = scheme;
     }
 
-    public String getUriHostAddress(){
-        return this.scheme + "://" + this.host;
+    public String getContextPath() {
+        return this.contextPath;
+    }
+
+    public void setContextPath(final String contextPath) {
+        this.contextPath = contextPath;
+    }
+
+    public String getUriHostAddress() {
+        return this.scheme + "://" + this.host + this.contextPath;
     }
 }

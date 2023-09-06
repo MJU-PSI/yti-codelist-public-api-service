@@ -50,7 +50,6 @@ import static fi.vm.yti.codelist.api.util.EncodingUtils.*;
 public class UriResolverResource extends AbstractBaseResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(UriResolverResource.class);
-    private static final String API_PATH_CODELIST = "/codelist";
     private static final String PATH_CODE = "code";
     private static final String PATH_EXTENSION = "extension";
 
@@ -79,7 +78,7 @@ public class UriResolverResource extends AbstractBaseResource {
         final ObjectNode json = objectMapper.createObjectNode();
         json.put("uri", uri);
         checkResourceValidity(uriPath);
-        final String resourcePath = uriPath.substring(API_PATH_CODELIST.length() + 1);
+        final String resourcePath = uriPath.substring(uriProperties.getContextPath().length() + 1);
         final List<String> resourceCodeValues = Arrays.asList(resourcePath.split("/"));
         json.put("url", resolveApiResourceUrl(resourceCodeValues));
         return Response.ok().entity(json).build();
@@ -101,7 +100,7 @@ public class UriResolverResource extends AbstractBaseResource {
         ensureUriHost(uriDecoded);
         final String uriPath = uriDecoded.substring((uriProperties.getUriHostAddress()).length());
         checkResourceValidity(uriPath);
-        final String resourcePath = uriPath.substring(API_PATH_CODELIST.length() + 1);
+        final String resourcePath = uriPath.substring(uriProperties.getContextPath().length() + 1);
         final List<String> resourcePathParams = parseResourcePathIdentifiers(resourcePath);
         final List<String> acceptHeaders = parseAcceptHeaderValues(accept);
         if (format != null && !format.isEmpty()) {
@@ -239,9 +238,9 @@ public class UriResolverResource extends AbstractBaseResource {
     }
 
     private void checkResourceValidity(final String uriPath) {
-        final String resourcePath = uriPath.substring(API_PATH_CODELIST.length() + 1);
+        final String resourcePath = uriPath.substring(uriProperties.getContextPath().length() + 1);
         final List<String> resourceCodeValues = Arrays.asList(resourcePath.split("/"));
-        if (!uriPath.toLowerCase().startsWith(API_PATH_CODELIST)) {
+        if (!uriPath.toLowerCase().startsWith(uriProperties.getContextPath())) {
             LOG.error("Codelist resource URI not resolvable, wrong context path!");
             throw new YtiCodeListException(new ErrorModel(HttpStatus.NOT_ACCEPTABLE.value(), "Codelist resource URI not resolvable, wrong context path!"));
         } else if (resourceCodeValues.isEmpty()) {
