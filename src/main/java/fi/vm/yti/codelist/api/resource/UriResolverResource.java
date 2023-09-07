@@ -98,7 +98,7 @@ public class UriResolverResource extends AbstractBaseResource {
                                 @Parameter(description = "Resource URI.", required = true, in = ParameterIn.QUERY) @Encoded @QueryParam("uri") final String uri) {
         final String uriDecoded = urlDecodeString(uri);
         ensureUriHost(uriDecoded);
-        final String uriPath = uriDecoded.substring((uriProperties.getUriHostAddress()).length());
+        final String uriPath = uriDecoded.substring((uriProperties.getUriHost()).length());
         checkResourceValidity(uriPath);
         final String resourcePath = uriPath.substring(uriProperties.getContextPath().length() + 1);
         final List<String> resourcePathParams = parseResourcePathIdentifiers(resourcePath);

@@ -44,6 +44,11 @@ public class UriProperties {
         this.contextPath = contextPath;
     }
 
+
+    public String getUriHost() {
+        return this.scheme + "://" + this.host;
+    }
+
     public String getUriHostAddress() {
         return this.scheme + "://" + this.host + this.contextPath;
     }
