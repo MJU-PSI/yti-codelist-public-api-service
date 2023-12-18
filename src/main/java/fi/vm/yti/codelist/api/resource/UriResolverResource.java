@@ -70,7 +70,7 @@ public class UriResolverResource extends AbstractBaseResource {
     @Produces({ MediaType.APPLICATION_JSON + ";charset=UTF-8", MediaType.TEXT_PLAIN })
     public Response resolveUri(@Parameter(description = "Resource URI.", required = true, in = ParameterIn.QUERY) @QueryParam("uri") final String uri) {
         final URI resolveUri = parseUriFromString(uri);
-        ensureUriHost(uri);
+        ensureUriHost(uri.replaceFirst("https?://", ""));
         final String uriPath = resolveUri.getPath();
         final ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
@@ -96,9 +96,10 @@ public class UriResolverResource extends AbstractBaseResource {
                                 @Parameter(description = "Format for returning content.", in = ParameterIn.QUERY) @QueryParam("format") final String format,
                                 @Parameter(description = "Filter string (csl) for expanding specific child resources.", in = ParameterIn.QUERY) @QueryParam("expand") final String expand,
                                 @Parameter(description = "Resource URI.", required = true, in = ParameterIn.QUERY) @Encoded @QueryParam("uri") final String uri) {
-        final String uriDecoded = urlDecodeString(uri);
-        ensureUriHost(uriDecoded);
-        final String uriPath = uriDecoded.substring((uriProperties.getUriHost()).length());
+        String scheme = "https?://";
+        final String uriNoScheme = urlDecodeString(uri).replaceFirst(scheme, "");
+        ensureUriHost(uriNoScheme);
+        final String uriPath = uriNoScheme.substring((uriProperties.getHost()).length());
         checkResourceValidity(uriPath);
         final String resourcePath = uriPath.substring(uriProperties.getContextPath().length() + 1);
         final List<String> resourcePathParams = parseResourcePathIdentifiers(resourcePath);
